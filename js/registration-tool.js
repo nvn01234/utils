@@ -1,4 +1,9 @@
-var RegistrationTool = function() {
+var RegistrationTool = function(options) {
+    var defaults = {
+        interval: 1000
+    };
+    this.options = $.extend({}, defaults, options);
+
     this.rowIndexMap = {};
 
     this.disableBlockUI = function() {
@@ -82,7 +87,7 @@ var RegistrationTool = function() {
             });
             RegisteredSubject();
             $this.submit();
-        }, 500);
+        }, this.options.interval);
     };
 
     this.submit = function() {
