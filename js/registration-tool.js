@@ -2,7 +2,15 @@ var RegistrationTool = function() {
     this.rowIndexMap = {};
 
     this.disableBlockUI = function() {
+        this._blockUI = App.blockUI;
         App.blockUI = function() {}
+    };
+
+    this.disableNoty = function() {
+        this._showNoty = showNoty;
+        showNoty = function(n, t, i) {
+            console.log(t + ": " + n);
+        }
     };
 
     this.enableRegistration = function() {
@@ -10,16 +18,17 @@ var RegistrationTool = function() {
     };
 
     this.disableCheckConflict = function() {
-        this.CheckConflict = CheckConflict; // backup
+        this._CheckConflict = CheckConflict; // backup
         CheckConflict = function() {}
     };
 
     this.enableCheckConflict = function() {
-        CheckConflict = this.CheckConflict;
+        CheckConflict = this._CheckConflict;
     };
 
     this.init = function() {
         this.enableRegistration();
+        this.disableNoty();
         this.disableCheckConflict();
         DSDK(2);
         this.disableBlockUI();
@@ -30,15 +39,11 @@ var RegistrationTool = function() {
             var t = $(e).data('rowindex');
             Abort(t);
         });
-        this.RegisteredSubject();
+        RegisteredSubject();
     };
     this.standardCode = function(code) {
         code = code.replace(/^[^A-Z]*([A-Z]+) ?(\d+)( (\d+))?(.|\n)*$/, "$1$2$3");
         return code;
-    };
-    this.RegisteredSubject = function() {
-        RegisteredSubject();
-        $n && $n.close();
     };
 
     this.findRowIndexMap = function() {
@@ -75,15 +80,14 @@ var RegistrationTool = function() {
                     Pending(rowindex);
                 }
             });
-            $this.RegisteredSubject();
+            RegisteredSubject();
             $this.submit();
         }, 500);
     };
 
     this.submit = function() {
         function n(n) {
-            console.log(n.message);
-            $n && $n.close();
+            console.log("alert:" + n.message);
             DSDK(2);
         }
         var t = "/xac-nhan-dang-ky/" + $registrationMode;
