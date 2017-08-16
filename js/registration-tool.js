@@ -21,7 +21,7 @@ var RegistrationTool = function() {
     this.init = function() {
         this.enableRegistration();
         this.disableCheckConflict();
-        DSDK($dsdkMod);
+        DSDK(2);
         this.disableBlockUI();
     };
 
@@ -30,11 +30,15 @@ var RegistrationTool = function() {
             var t = $(e).data('rowindex');
             Abort(t);
         });
-        RegisteredSubject();
+        this.RegisteredSubject();
     };
     this.standardCode = function(code) {
         code = code.replace(/^[^A-Z]*([A-Z]+) ?(\d+)( (\d+))?(.|\n)*$/, "$1$2$3");
         return code;
+    };
+    this.RegisteredSubject = function() {
+        RegisteredSubject();
+        $n && $n.close();
     };
 
     this.findRowIndexMap = function() {
@@ -61,8 +65,8 @@ var RegistrationTool = function() {
 
     this.loop = function() {
         var $this = this;
-        if (this.interval !== null) {
-            window.clearInterval(this.interval);
+        if ($this.interval !== null) {
+            window.clearInterval($this.interval);
         }
         this.interval = window.setInterval(function () {
             $this.subjects.forEach(function(code) {
@@ -71,14 +75,19 @@ var RegistrationTool = function() {
                     Pending(rowindex);
                 }
             });
-            RegisteredSubject();
+            $this.RegisteredSubject();
             $this.submit();
         }, 500);
     };
 
     this.submit = function() {
+        function n(n) {
+            console.log(n.message);
+            $n && $n.close();
+            DSDK(2);
+        }
         var t = "/xac-nhan-dang-ky/" + $registrationMode;
-        ajaxRequest("POST", t, "json", null, null, null, !0);
+        ajaxRequest("POST", t, "json", n, null, null, !0);
     };
 
     this.stop = function() {
