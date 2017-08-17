@@ -46,9 +46,12 @@ var RegistrationTool = function(options) {
         });
         RegisteredSubject();
     };
-    this.standardCode = function(code) {
+    this.standardizedCode = function(code) {
         code = code.replace(/^[^A-Z]*([A-Z]+) ?(\d+)( (\d+))?(.|\n)*$/, "$1$2$3");
         return code;
+    };
+    this.shortCode = function(code) {
+        return this.standardizedCode(code).split(" ")[0];
     };
 
     this.findRowIndexMap = function() {
@@ -56,7 +59,7 @@ var RegistrationTool = function(options) {
         $(".order").each(function(i, e) {
             var rowindex = $(e).data("rowindex");
             var code = $(e).closest("tr").find("td:eq(4)").text().trim();
-            $this.rowIndexMap[$this.standardCode(code)] = rowindex;
+            $this.rowIndexMap[$this.standardizedCode(code)] = rowindex;
         });
         return JSON.stringify(this.rowIndexMap);
     };
@@ -75,12 +78,13 @@ var RegistrationTool = function(options) {
 
     this.loop = function() {
         var $this = this;
-        if ($this.interval !== null) {
-            window.clearInterval($this.interval);
-        }
+        this.stop();
         this.interval = window.setInterval(function () {
             $this.subjects.forEach(function(code) {
-                var rowindex = $this.rowIndexMap[$this.standardCode(code)];
+                var rowindex = $this.rowIndexMap[$this.standardizedCode(code)];
+                if (rowindex === undefined) {
+                    rowindex = $this.rowIndexMap[$this.shortCode(code)];
+                }
                 if (rowindex !== undefined) {
                     Pending(rowindex);
                 }
@@ -100,25 +104,28 @@ var RegistrationTool = function(options) {
     };
 
     this.stop = function() {
-        window.clearInterval(this.interval);
-        this.interval = null;
+        if (this.interval !== null) {
+            window.clearInterval(this.interval);
+            this.interval = null;
+        }
     }
 };
 
 // Usage:
 //
+// Khởi tạo:
 // var tool = new RegistrationTool();
-// tool.init(); // init tool
 //
-// tool.findRowIndexMap(); // lấy ra danh sách row, hoặc:
-// tool.rowIndexMap = {...}; // assign map đã tìm sẵn
+// Init:
+// tool.init();
 //
-// tool.abortAll(); // xoá tất cả các môn đã đăng ký
-//
+// Đăng ký nhiều môn:
 // var codes = ["INT2204 1", "INT2205 2"];
-// tool.registerSubjects(codes); // đăng ký nhiều môn, loop
+// tool.registerSubjects(codes);
 //
+// Đăng ký 1 môn:
 // var code = "INT2204 1";
-// tool.registerSubject(code); // đăng ký 1 môn, loop
+// tool.registerSubject(code);
 //
-// tool.stop(); // dừng loop
+// Dừng
+// tool.stop();
